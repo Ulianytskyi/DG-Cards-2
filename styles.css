@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Gabarito&display=swap');
+
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    font-family: 'Gabarito', sans-serif;
+    overflow: hidden;
+    touch-action: none;
+}
+
+#info-field {
+    position: absolute;
+    top: 10%;
+}
+
+#touch-field {
+    position: absolute;
+    top: 15%;
+}
+
+.game-container {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 150px);
+    grid-gap: 30px 10px;
+}
+
+.card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    
+    width: 100px;
+    height: 150px;
+    background-color: ghostwhite;
+    border: 1px solid #ccc;
+    /* cursor: url('cur_grab1.png'), grab; */
+}
+
+.card:active {
+    cursor: url('cur_grab2.png'), grab;
+    background-color: papayawhip;
+}
+
+.empty-zone {
+    display: block;  
+    width: 100px;
+    height: 150px;
+    /* background-color: ghostwhite; */
+    /* border: 1px solid #ccc; */
+}
+
+.place-for-cards {
+    display: block;
+    width: 100px;
+    height: 150px;
+    background-color: rgb(215, 215, 255);
+    border: 1px solid #ccc;
+    font-size: 60px;
+}
+
+.card-on-place {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    width: 100px;
+    height: 150px;
+    background-color: rgb(176, 176, 255);
+    border: 1px solid #ccc;
+
+}
+.card-over-place {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    width: 100px;
+    height: 150px;
+    background-color: rgb(255, 221, 176);
+    border: 1px solid #ccc;
+
+}
+
+.hide {
+    opacity: 0;
+}
