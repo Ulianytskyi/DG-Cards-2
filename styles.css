@@ -19,7 +19,7 @@ body {
 
 #score-field {
     position: absolute;
-    top: -10%;
+    top: -75px;
 }
 
 #touch-field {
@@ -31,7 +31,7 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-template-rows: repeat(2, 150px);
-    grid-gap: 100px 10px;
+    grid-gap: 80px 10px;
 }
 
 .card {
@@ -39,17 +39,20 @@ body {
     justify-content: center;
     align-items: center;
     font-size: 60px;
-    
     width: 100px;
     height: 150px;
     background-color: ghostwhite;
     border: 1px solid #ccc;
-    /* cursor: url('cur_grab1.png'), grab; */
+    border-radius: 4px;
+    cursor: url('cur_grab1.png'), grab;
 }
 
-.card:active {
-    cursor: url('cur_grab2.png'), grab;
-    background-color: papayawhip;
+.player1 {
+    background-color: rgb(252, 223, 228);
+}
+
+.player2 {
+    background-color: rgb(223, 252, 180);
 }
 
 .hide {
@@ -63,9 +66,26 @@ body {
 
 #cover {
     position: absolute;
-    display: block;
-    width: 400px;
-    height: 400px;
-    background-color: rgba(127, 255, 212, 0);
+    top: -100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 500px;
+    height: 510px;
     z-index: -1;
+}
+
+.game-over-screen {
+    position: relative;
+    font-size: 50px;
+}
+
+.restart-button {
+    position: relative;
+    top: 25px;
+    width: 200px;
+    font-size: 20px;
+    height: 30px;
+    cursor: pointer;
 }

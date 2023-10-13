@@ -12,13 +12,13 @@ function showScore(p1, p2) {
     
     scoreField.innerHTML = `<table>
                                 <tr>
-                                    <td>P1:</td>
+                                    <td>Player 1:</td>
                                     <td></td>
                                     <td>${player1Score}</td>
                                     <td class='p1-result'>${p1value}</td>
                                 </tr>
                                 <tr>
-                                    <td>P2:</td>
+                                    <td>Player 2:</td>
                                     <td></td>
                                     <td>${player2Score}</td>
                                     <td class='p2-result'>${p2value}</td>
@@ -32,7 +32,6 @@ function showScore(p1, p2) {
 }
 
 showScore(0, 0);
-
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -81,45 +80,58 @@ let currentValue = null;
 let firstCard = null;
 let secondCard = null;
 
-let firstTurn = null;
-let secondTurn = null;
+let firstTake = null;
+let secondTake = null;
+
+let sideTurn = null;
 
 function onMouseDown(event) {
-    currentCard = event.target;
-    currentValue = parseInt(currentCard.innerText);
-    currentCard.style.zIndex = 1;
-    
-    const onMouseMove = (e) => {
-        if (
-            e.clientX > event.clientX + 50 ||
-            e.clientX < event.clientX - 50 ||
-            e.clientY > event.clientY + 50 ||
-            e.clientY < event.clientY - 50
-            ) {
-                
-                firstCard = currentCard;
-                firstTurn = currentCard.classList[1];
-            
-                currentCard == null;
-        }
-        currentCard.style.transform = 'translate(' + (e.clientX - event.clientX) + 'px, ' + (e.clientY - event.clientY) + 'px)';
+
+    if (sideTurn == null) {
+        sideTurn = event.target.classList[1];
+    }
+    if (event.target.classList[1] == sideTurn) {
+
+        currentCard = event.target;
+        currentValue = parseInt(currentCard.innerText);
+        currentCard.style.zIndex = 1;
         
-    };
-    
-    const onMouseUp = () => {
-        currentCard.style.zIndex = '';
-        currentCard.style.transform = '';
-        currentCard == null;
+        const onMouseMove = (e) => {
+            if (
+                e.clientX > event.clientX + 50 ||
+                e.clientX < event.clientX - 50 ||
+                e.clientY > event.clientY + 50 ||
+                e.clientY < event.clientY - 50
+                ) {
+                    
+                    firstCard = currentCard;
+                    firstTake = currentCard.classList[1];
+                
+                    currentCard == null;
+                    sideTurn == null;
+
+            }
+            currentCard.style.transform = 'translate(' + (e.clientX - event.clientX) + 'px, ' + (e.clientY - event.clientY) + 'px)';
+            
+        };
+        
+        const onMouseUp = () => {
+            currentCard.style.zIndex = '';
+            currentCard.style.transform = '';
+            currentCard == null;
+            
+            sideTurn = sideTurn == 'player1' ? 'player2' : 'player1';
+            
+            document.addEventListener('mouseover', onMouseOver);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            
+        };
         
         document.addEventListener('mouseover', onMouseOver);
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        
-    };
-    
-    document.addEventListener('mouseover', onMouseOver);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
     
 }
 
@@ -129,12 +141,12 @@ function onMouseOver(event) {
 
         if (event.target.classList.contains('card')) {
             secondCard = event.target;
-            secondTurn = secondCard.classList[1];
+            secondTake = secondCard.classList[1];
             let newValue = parseInt(secondCard.innerText);
-            if (firstCard !== null && firstCard !== secondCard && secondCard !== null && firstTurn != secondTurn) {
+            if (firstCard !== null && firstCard !== secondCard && secondCard !== null && firstTake != secondTake) {
                 
                 const result = currentValue-newValue;
-                checkScore(firstTurn, result);
+                checkScore(firstTake, result);
                 
             }
             secondCard = null;
@@ -148,14 +160,18 @@ function onMouseOver(event) {
 }
 
 function newCards(card1, card2, time) {
-    coverBlock.style.zIndex = 1;
-    setTimeout(() => {
-        takeValueForCard(card1);
-        takeValueForCard(card2);
-        card1.classList.remove('hide');
-        card2.classList.remove('hide');
-        coverBlock.style.zIndex = -1;
-    }, time);
+    if (cardDeck.length > 0) {
+        coverBlock.style.zIndex = 1;
+        setTimeout(() => {
+            takeValueForCard(card1);
+            takeValueForCard(card2);
+            card1.classList.remove('hide');
+            card2.classList.remove('hide');
+            coverBlock.style.zIndex = -1;
+        }, time);
+    } else {
+        gameOverScreen();
+    }
 }
 
 function scoreCalculating(resultValue) {
@@ -164,11 +180,11 @@ function scoreCalculating(resultValue) {
     return result;
 }
 
-function checkScore(firstTurn, result) {
+function checkScore(firstTake, result) {
 
     const pointsValue = scoreCalculating(result);
     
-    if (firstTurn == 'player1') {
+    if (firstTake == 'player1') {
         player1Score += result;
         showScore(pointsValue, 0);
 
@@ -180,12 +196,35 @@ function checkScore(firstTurn, result) {
     firstCard.classList.add('hide');
     secondCard.classList.add('hide');
     newCards(firstCard, secondCard, 1000);
+
+}
+
+function gameOverScreen() {
+    coverBlock.style.zIndex = 1;
+    coverBlock.style.backgroundColor = 'white';
+
+    const gameOverText = document.createElement('div');
+    gameOverText.className = 'game-over-screen';
+
+    let winner = (player1Score > player2Score) ? 'Player 1 wins!' : "Player 2 wins";
+    gameOverText.innerHTML = winner;
+
+    const restartButton = document.createElement('button');
+    restartButton.className = 'restart-button';
+    restartButton.textContent = 'Restart';
+    restartButton.addEventListener('click', ()=> {
+        location.reload();
+    });
+
+    coverBlock.appendChild(gameOverText);
+    coverBlock.appendChild(restartButton);
+    
 }
 
 function initializeGame() {
     gameContainer.innerHTML = '';
     for (let i = 0; i < 6; i++) {
-        const side = i < 3 ? 'player2' : 'player1';
+        const side = i < 3 ? 'player1' : 'player2';
         const card = createCard(side);
         gameContainer.appendChild(card);
     }
