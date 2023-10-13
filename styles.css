@@ -4,8 +4,10 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    /* align-items: center; */
     height: 100vh;
+    position: relative;
+    top: 100px;
     margin: 0;
     user-select: none;
     -webkit-user-select: none;
@@ -15,9 +17,9 @@ body {
     touch-action: none;
 }
 
-#info-field {
+#score-field {
     position: absolute;
-    top: 10%;
+    top: -10%;
 }
 
 #touch-field {
@@ -28,8 +30,8 @@ body {
 .game-container {
     display: grid;
     grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 150px);
-    grid-gap: 30px 10px;
+    grid-template-rows: repeat(2, 150px);
+    grid-gap: 100px 10px;
 }
 
 .card {
@@ -50,46 +52,20 @@ body {
     background-color: papayawhip;
 }
 
-.empty-zone {
-    display: block;  
-    width: 100px;
-    height: 150px;
-    /* background-color: ghostwhite; */
-    /* border: 1px solid #ccc; */
-}
-
-.place-for-cards {
-    display: block;
-    width: 100px;
-    height: 150px;
-    background-color: rgb(215, 215, 255);
-    border: 1px solid #ccc;
-    font-size: 60px;
-}
-
-.card-on-place {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 60px;
-    width: 100px;
-    height: 150px;
-    background-color: rgb(176, 176, 255);
-    border: 1px solid #ccc;
-
-}
-.card-over-place {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 60px;
-    width: 100px;
-    height: 150px;
-    background-color: rgb(255, 221, 176);
-    border: 1px solid #ccc;
-
-}
-
 .hide {
     opacity: 0;
+}
+
+.p1-result,
+.p2-result {
+    color: red;
+}
+
+#cover {
+    position: absolute;
+    display: block;
+    width: 400px;
+    height: 400px;
+    background-color: rgba(127, 255, 212, 0);
+    z-index: -1;
 }
