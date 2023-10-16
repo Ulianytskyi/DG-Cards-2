@@ -47,20 +47,20 @@ body {
     cursor: url('cur_grab1.png'), grab;
 }
 
-.player1 {
+.computer {
     background-color: rgb(252, 223, 228);
 }
 
-.player2 {
+.player {
     background-color: rgb(223, 252, 180);
 }
 
-.hide {
+.hide, .zero {
     opacity: 0;
 }
 
-.p1-result,
-.p2-result {
+.computer-result,
+.player-result {
     color: red;
 }
 
@@ -90,8 +90,8 @@ body {
     cursor: pointer;
 }
 
-.p1-turn-selector,
-.p2-turn-selector {
+.computer-turn-selector,
+.player-turn-selector {
     position: absolute;
     transform: translate(-10px, 220px);
     width: 340px;
@@ -100,6 +100,6 @@ body {
     border: 2px solid aquamarine;
     border-radius: 4px;
 }
-.p2-turn-selector {
+.player-turn-selector {
     transform: translate(-10px, -10px);
 }

@@ -2,37 +2,38 @@ const coverBlock = document.getElementById('cover');
 const gameContainer = document.getElementById('game-container');
 const scoreField = document.getElementById('score-field');
 
-const p1TurnSelector = document.createElement('div');
-p1TurnSelector.className = 'p1-turn-selector hide';
-const p2TurnSelector = document.createElement('div');
-p2TurnSelector.className = 'p2-turn-selector hide';
+const computerTurnSelector = document.createElement('div');
+computerTurnSelector.className = 'computer-turn-selector hide';
+const playerTurnSelector = document.createElement('div');
+playerTurnSelector.className = 'player-turn-selector hide';
 
-let player1Score = 0;
-let player2Score = 0;
+let playerScore = 0;
+let computerScore = 0;
+let cardCounter = 2;
 
-function showScore(p1, p2) {
+function showScore(computer, player) {
     
-    const p1value = p1 == 0 ? '' : p1;
-    const p2value = p2 == 0 ? '' : p2;
+    const playerValue = computer == 0 ? '' : computer;
+    const computerValue = player == 0 ? '' : player;
     
     scoreField.innerHTML = `<table>
                                 <tr>
                                     <td>Player:</td>
                                     <td></td>
-                                    <td>${player1Score}</td>
-                                    <td class='p1-result'>${p1value}</td>
+                                    <td>${playerScore}</td>
+                                    <td class='computer-result'>${playerValue}</td>
                                 </tr>
                                 <tr>
                                     <td>Computer:</td>
                                     <td></td>
-                                    <td>${player2Score}</td>
-                                    <td class='p2-result'>${p2value}</td>
+                                    <td>${computerScore}</td>
+                                    <td class='player-result'>${computerValue}</td>
                                 </tr>
                             </table>`;
     
     setTimeout(()=> {
-        document.querySelector('.p1-result').classList.add('hide');
-        document.querySelector('.p2-result').classList.add('hide');
+        document.querySelector('.computer-result').classList.add('hide');
+        document.querySelector('.player-result').classList.add('hide');
     }, 500);                       
 }
 
@@ -63,6 +64,7 @@ function takeValueForCard(card) {
         cardDeck.shift();
     } else {
         card.innerText = 0;
+        card.className = 'card zero';
     }
 }
 
@@ -81,7 +83,7 @@ function getRandomNumber() {
 
 function getRandomSide() {
     let sideNumber = Math.floor(Math.random() * 2);
-    return sideNumber = sideNumber == 0 ? 'player1' : 'player2';
+    return sideNumber = sideNumber == 0 ? 'computer' : 'player';
 }
 
 let currentCard = null;
@@ -119,16 +121,15 @@ function onMouseDown(event) {
 
             }
             currentCard.style.transform = 'translate(' + (e.clientX - event.clientX) + 'px, ' + (e.clientY - event.clientY) + 'px)';
-            // console.log(e.clientY);
         };
         
         const onMouseUp = (ev) => {
             currentCard.style.zIndex = '';
             currentCard.style.transform = '';
             currentCard == null;
-            
+
             if (ev.clientY < 280) {
-                sideTurn = sideTurn == 'player1' ? 'player2' : 'player1';
+                sideTurn = sideTurn == 'computer' ? 'player' : 'computer';
             }
             
             document.addEventListener('mouseover', onMouseOver);
@@ -169,7 +170,7 @@ function onMouseOver(event) {
 }
 
 function newCards(card1, card2, time) {
-    if (cardDeck.length > 0) {
+    if (cardCounter < 90) {
         coverBlock.style.zIndex = 1;
         setTimeout(() => {
             takeValueForCard(card1);
@@ -181,18 +182,22 @@ function newCards(card1, card2, time) {
             checkTurn();
             
         }, time);
-    } else {
-        gameOverScreen();
+    } else if (cardCounter == 90){
+        computerTurnSelector.className = 'zero';
+        playerTurnSelector.className = 'zero';
+        setTimeout(()=> {
+            gameOverScreen();
+        }, 2000)
     }
 }
 
 function checkTurn() {
-    if (sideTurn =='player2') {
-        p1TurnSelector.classList.remove('hide');
-        p2TurnSelector.classList.add('hide');
-    } else if (sideTurn =='player1'){
-        p2TurnSelector.classList.remove('hide');
-        p1TurnSelector.classList.add('hide');
+    if (sideTurn =='player') {
+        computerTurnSelector.classList.remove('hide');
+        playerTurnSelector.classList.add('hide');
+    } else if (sideTurn =='computer'){
+        playerTurnSelector.classList.remove('hide');
+        computerTurnSelector.classList.add('hide');
         setTimeout(() => {
             aiPlayerTurn();
         }, 1000);
@@ -208,14 +213,15 @@ function scoreCalculating(resultValue) {
 function checkScore(firstTake, currentValue, newValue) {
     const result = currentValue-newValue;
     const pointsValue = scoreCalculating(result);
-    if (firstTake == 'player2') {
-        player1Score += result;
+    if (firstTake == 'player') {
+        playerScore += result;
         showScore(pointsValue, 0);
     } else {
-        player2Score += result;
+        computerScore += result;
         showScore(0, pointsValue);
     }
     newCards(firstCard, secondCard, 1000);
+    cardCounter += 2;
 }
 
 function gameOverScreen() {
@@ -225,7 +231,7 @@ function gameOverScreen() {
     const gameOverText = document.createElement('div');
     gameOverText.className = 'game-over-screen';
 
-    let winner = (player1Score > player2Score) ? 'Player 1 wins!' : "Player 2 wins";
+    let winner = (playerScore > computerScore) ? 'Player wins!' : "Computer wins";
     gameOverText.innerHTML = winner;
 
     const restartButton = document.createElement('button');
@@ -257,33 +263,33 @@ let animateEndX = 0;
 let animateEndY = 0;
 
 function aiPlayerTurn() {
-    const aiCards = document.querySelectorAll('.card.player1:not(.hide)');
-    const player1Cards = document.querySelectorAll('.card.player2:not(.hide)');
+    const aiCards = document.querySelectorAll('.card.computer:not(.hide)');
+    const computerCards = document.querySelectorAll('.card.player:not(.hide)');
 
     let aiCard = null;
     let playerCard = null;
     let aiMaxCard = null;
-    let player1MinCard = null;
+    let computerMinCard = null;
 
     aiCards.forEach((card) => {
         const cardValue = parseInt(card.innerText);
-        if (aiMaxCard === null || cardValue > aiMaxCard) {
+        if ((aiMaxCard === null || cardValue > aiMaxCard) && cardValue !== 0) {
             aiMaxCard = cardValue;
             aiCard = card;
         }
     });
 
-    player1Cards.forEach((card) => {
+    computerCards.forEach((card) => {
         const cardValue = parseInt(card.innerText);
-        if (player1MinCard === null || cardValue < player1MinCard) {
-            player1MinCard = cardValue;
+        if ((computerMinCard === null || cardValue < computerMinCard) && cardValue !== 0) {
+            computerMinCard = cardValue;
             playerCard = card;
         }
     });
 
-    if (aiMaxCard !== null && player1MinCard !== null) {
+    if (aiMaxCard !== null && computerMinCard !== null) {
         const aiCard = Array.from(aiCards).find((card) => parseInt(card.innerText) === aiMaxCard);
-        const playerCard = Array.from(player1Cards).find((card) => parseInt(card.innerText) === player1MinCard);
+        const playerCard = Array.from(computerCards).find((card) => parseInt(card.innerText) === computerMinCard);
 
         if (aiCard && playerCard) {
             const aiCardRect = aiCard.getBoundingClientRect();
@@ -298,8 +304,8 @@ function aiPlayerTurn() {
 
             firstCard = aiCard;
             secondCard = playerCard;
-            checkScore(firstCard, aiMaxCard, player1MinCard);
-            sideTurn = sideTurn == 'player1' ? 'player2' : 'player1';
+            checkScore(firstCard, aiMaxCard, computerMinCard);
+            sideTurn = sideTurn == 'computer' ? 'player' : 'computer';
 
             setTimeout(() => {
                 checkTurn();
@@ -309,14 +315,14 @@ function aiPlayerTurn() {
 }
 
 function createTurnSelectors() {
-    gameContainer.appendChild(p1TurnSelector);
-    gameContainer.appendChild(p2TurnSelector);
+    gameContainer.appendChild(computerTurnSelector);
+    gameContainer.appendChild(playerTurnSelector);
 }
 
 function initializeGame() {
     gameContainer.innerHTML = '';
     for (let i = 0; i < 6; i++) {
-        const side = i < 3 ? 'player1' : 'player2';
+        const side = i < 3 ? 'computer' : 'player';
         const card = createCard(side);
         gameContainer.appendChild(card);
     }
