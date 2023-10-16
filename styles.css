@@ -89,3 +89,17 @@ body {
     height: 30px;
     cursor: pointer;
 }
+
+.p1-turn-selector,
+.p2-turn-selector {
+    position: absolute;
+    transform: translate(-10px, 220px);
+    width: 340px;
+    height: 170px;
+    z-index: -1;
+    border: 2px solid aquamarine;
+    border-radius: 4px;
+}
+.p2-turn-selector {
+    transform: translate(-10px, -10px);
+}

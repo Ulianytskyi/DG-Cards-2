@@ -2,6 +2,11 @@ const coverBlock = document.getElementById('cover');
 const gameContainer = document.getElementById('game-container');
 const scoreField = document.getElementById('score-field');
 
+const p1TurnSelector = document.createElement('div');
+p1TurnSelector.className = 'p1-turn-selector hide';
+const p2TurnSelector = document.createElement('div');
+p2TurnSelector.className = 'p2-turn-selector hide';
+
 let player1Score = 0;
 let player2Score = 0;
 
@@ -12,13 +17,13 @@ function showScore(p1, p2) {
     
     scoreField.innerHTML = `<table>
                                 <tr>
-                                    <td>Player 1:</td>
+                                    <td>Player:</td>
                                     <td></td>
                                     <td>${player1Score}</td>
                                     <td class='p1-result'>${p1value}</td>
                                 </tr>
                                 <tr>
-                                    <td>Player 2:</td>
+                                    <td>Computer:</td>
                                     <td></td>
                                     <td>${player2Score}</td>
                                     <td class='p2-result'>${p2value}</td>
@@ -66,12 +71,17 @@ function createCard(side) {
     card.className = `card ${side}`;
     takeValueForCard(card);
     card.addEventListener('mousedown', onMouseDown);
-    
+   
     return card;
 }
 
 function getRandomNumber() {
     return Math.floor(Math.random() * 10) + 1;
+}
+
+function getRandomSide() {
+    let sideNumber = Math.floor(Math.random() * 2);
+    return sideNumber = sideNumber == 0 ? 'player1' : 'player2';
 }
 
 let currentCard = null;
@@ -83,13 +93,10 @@ let secondCard = null;
 let firstTake = null;
 let secondTake = null;
 
-let sideTurn = null;
+let sideTurn = getRandomSide();
 
 function onMouseDown(event) {
 
-    if (sideTurn == null) {
-        sideTurn = event.target.classList[1];
-    }
     if (event.target.classList[1] == sideTurn) {
 
         currentCard = event.target;
@@ -112,15 +119,17 @@ function onMouseDown(event) {
 
             }
             currentCard.style.transform = 'translate(' + (e.clientX - event.clientX) + 'px, ' + (e.clientY - event.clientY) + 'px)';
-            
+            // console.log(e.clientY);
         };
         
-        const onMouseUp = () => {
+        const onMouseUp = (ev) => {
             currentCard.style.zIndex = '';
             currentCard.style.transform = '';
             currentCard == null;
             
-            sideTurn = sideTurn == 'player1' ? 'player2' : 'player1';
+            if (ev.clientY < 280) {
+                sideTurn = sideTurn == 'player1' ? 'player2' : 'player1';
+            }
             
             document.addEventListener('mouseover', onMouseOver);
             document.removeEventListener('mousemove', onMouseMove);
@@ -145,9 +154,9 @@ function onMouseOver(event) {
             let newValue = parseInt(secondCard.innerText);
             if (firstCard !== null && firstCard !== secondCard && secondCard !== null && firstTake != secondTake) {
                 
-                const result = currentValue-newValue;
-                checkScore(firstTake, result);
-                
+                checkScore(firstTake, currentValue, newValue );
+                firstCard.classList.add('hide');
+                secondCard.classList.add('hide');
             }
             secondCard = null;
         }
@@ -168,9 +177,25 @@ function newCards(card1, card2, time) {
             card1.classList.remove('hide');
             card2.classList.remove('hide');
             coverBlock.style.zIndex = -1;
+
+            checkTurn();
+            
         }, time);
     } else {
         gameOverScreen();
+    }
+}
+
+function checkTurn() {
+    if (sideTurn =='player2') {
+        p1TurnSelector.classList.remove('hide');
+        p2TurnSelector.classList.add('hide');
+    } else if (sideTurn =='player1'){
+        p2TurnSelector.classList.remove('hide');
+        p1TurnSelector.classList.add('hide');
+        setTimeout(() => {
+            aiPlayerTurn();
+        }, 1000);
     }
 }
 
@@ -180,23 +205,17 @@ function scoreCalculating(resultValue) {
     return result;
 }
 
-function checkScore(firstTake, result) {
-
+function checkScore(firstTake, currentValue, newValue) {
+    const result = currentValue-newValue;
     const pointsValue = scoreCalculating(result);
-    
-    if (firstTake == 'player1') {
+    if (firstTake == 'player2') {
         player1Score += result;
         showScore(pointsValue, 0);
-
     } else {
         player2Score += result;
         showScore(0, pointsValue);
- 
     }
-    firstCard.classList.add('hide');
-    secondCard.classList.add('hide');
     newCards(firstCard, secondCard, 1000);
-
 }
 
 function gameOverScreen() {
@@ -218,7 +237,80 @@ function gameOverScreen() {
 
     coverBlock.appendChild(gameOverText);
     coverBlock.appendChild(restartButton);
-    
+}
+
+function animateCardMove(card, card2, startX, startY, endX, endY) {
+    card.style.transition = 'transform 0.5s';
+    card.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
+
+    card.addEventListener('transitionend', function () {
+        card.style.transition = '';
+        card.style.transform = '';
+        card.classList.add('hide');
+        card2.classList.add('hide');
+    }, { once: true });
+}
+
+let animateStartX = 0;
+let animateStartY = 0;
+let animateEndX = 0;
+let animateEndY = 0;
+
+function aiPlayerTurn() {
+    const aiCards = document.querySelectorAll('.card.player1:not(.hide)');
+    const player1Cards = document.querySelectorAll('.card.player2:not(.hide)');
+
+    let aiCard = null;
+    let playerCard = null;
+    let aiMaxCard = null;
+    let player1MinCard = null;
+
+    aiCards.forEach((card) => {
+        const cardValue = parseInt(card.innerText);
+        if (aiMaxCard === null || cardValue > aiMaxCard) {
+            aiMaxCard = cardValue;
+            aiCard = card;
+        }
+    });
+
+    player1Cards.forEach((card) => {
+        const cardValue = parseInt(card.innerText);
+        if (player1MinCard === null || cardValue < player1MinCard) {
+            player1MinCard = cardValue;
+            playerCard = card;
+        }
+    });
+
+    if (aiMaxCard !== null && player1MinCard !== null) {
+        const aiCard = Array.from(aiCards).find((card) => parseInt(card.innerText) === aiMaxCard);
+        const playerCard = Array.from(player1Cards).find((card) => parseInt(card.innerText) === player1MinCard);
+
+        if (aiCard && playerCard) {
+            const aiCardRect = aiCard.getBoundingClientRect();
+            const playerCardRect = playerCard.getBoundingClientRect();
+
+            animateStartX = aiCardRect.left;
+            animateStartY = aiCardRect.top;
+            animateEndX = playerCardRect.left;
+            animateEndY = playerCardRect.top;
+
+            animateCardMove(aiCard, playerCard, animateStartX, animateStartY, animateEndX, animateEndY);
+
+            firstCard = aiCard;
+            secondCard = playerCard;
+            checkScore(firstCard, aiMaxCard, player1MinCard);
+            sideTurn = sideTurn == 'player1' ? 'player2' : 'player1';
+
+            setTimeout(() => {
+                checkTurn();
+            }, 1000);
+        }
+    }
+}
+
+function createTurnSelectors() {
+    gameContainer.appendChild(p1TurnSelector);
+    gameContainer.appendChild(p2TurnSelector);
 }
 
 function initializeGame() {
@@ -228,7 +320,9 @@ function initializeGame() {
         const card = createCard(side);
         gameContainer.appendChild(card);
     }
-    
+    checkTurn();
 }
-
+    
+showScore(0, 0);
 initializeGame();
+createTurnSelectors();
