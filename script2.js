@@ -73,6 +73,7 @@ function createCard(side) {
     card.className = `card ${side}`;
     takeValueForCard(card);
     card.addEventListener('mousedown', onMouseDown);
+    card.addEventListener('click', clickMouse);
    
     return card;
 }
@@ -86,6 +87,39 @@ function getRandomSide() {
     return sideNumber = sideNumber == 0 ? 'computer' : 'player';
 }
 
+let selectedCards = [];
+let clickedCard1 = null;
+let clickedCard2 = null;
+let clickedValue1 = null;
+let clickedValue2 = null;
+
+function clickMouse(event) {
+    if (sideTurn == 'player') {
+        const cardsForClick = document.querySelectorAll('.card');
+        const playerCards = document.querySelectorAll('.card.player:not(.hide)');
+        console.log(playerCards);
+        const aiCards = document.querySelectorAll('.card.computer:not(.hide)');
+        if (clickedCard1 === null && clickedCard2 === null && event.target.classList[1] === 'player') {
+            console.log('Select player card');
+            clickedValue1 = event.target.innerText;
+            clickedCard1 = Array.from(playerCards).find((card) => parseInt(card.innerText) === clickedValue1);
+            console.log(clickedCard1);
+        } else if (clickedCard1 !== null && clickedCard2 === null && event.target.classList[1] === 'player') {
+            console.log('Select other player card');
+            clickedCard1 = event.target;
+            clickedValue1 = event.target.innerText;
+        } else if (clickedCard1 !== null && clickedCard2 === null && event.target.classList[1] === 'computer') {
+            console.log('Select computer card');
+            clickedCard2 = event.target;
+            clickedValue2 = event.target.innerText;
+            console.log(clickedValue1, 'vs', clickedValue2);
+
+            
+        }
+
+    }
+}
+
 let currentCard = null;
 let currentValue = null;
 
@@ -96,6 +130,7 @@ let firstTake = null;
 let secondTake = null;
 
 let sideTurn = getRandomSide();
+console.log(sideTurn);
 
 function onMouseDown(event) {
 
@@ -264,12 +299,12 @@ let animateEndY = 0;
 
 function aiPlayerTurn() {
     const aiCards = document.querySelectorAll('.card.computer:not(.hide)');
-    const computerCards = document.querySelectorAll('.card.player:not(.hide)');
+    const playerCards = document.querySelectorAll('.card.player:not(.hide)');
 
-    let aiCard = null;
-    let playerCard = null;
+    console.log(aiCards);
+
     let aiMaxCard = null;
-    let computerMinCard = null;
+    let playerMinCard = null;
 
     aiCards.forEach((card) => {
         const cardValue = parseInt(card.innerText);
@@ -279,17 +314,17 @@ function aiPlayerTurn() {
         }
     });
 
-    computerCards.forEach((card) => {
+    playerCards.forEach((card) => {
         const cardValue = parseInt(card.innerText);
-        if ((computerMinCard === null || cardValue < computerMinCard) && cardValue !== 0) {
-            computerMinCard = cardValue;
+        if ((playerMinCard === null || cardValue < playerMinCard) && cardValue !== 0) {
+            playerMinCard = cardValue;
             playerCard = card;
         }
     });
 
-    if (aiMaxCard !== null && computerMinCard !== null) {
+    if (aiMaxCard !== null && playerMinCard !== null) {
         const aiCard = Array.from(aiCards).find((card) => parseInt(card.innerText) === aiMaxCard);
-        const playerCard = Array.from(computerCards).find((card) => parseInt(card.innerText) === computerMinCard);
+        const playerCard = Array.from(playerCards).find((card) => parseInt(card.innerText) === playerMinCard);
 
         if (aiCard && playerCard) {
             const aiCardRect = aiCard.getBoundingClientRect();
@@ -304,7 +339,7 @@ function aiPlayerTurn() {
 
             firstCard = aiCard;
             secondCard = playerCard;
-            checkScore(firstCard, aiMaxCard, computerMinCard);
+            checkScore(firstCard, aiMaxCard, playerMinCard);
             sideTurn = sideTurn == 'computer' ? 'player' : 'computer';
 
             setTimeout(() => {
@@ -312,6 +347,29 @@ function aiPlayerTurn() {
             }, 1000);
         }
     }
+}
+
+function animateAfterSelected(card1, card2) {
+    const card1Rect = card1.getBoundingClientRect();
+    const card2Rect = card2.getBoundingClientRect();
+
+    animateStartX = card1Rect.left;
+    animateStartY = card1Rect.top;
+    animateEndX = card2Rect.left;
+    animateEndY = card2Rect.top;
+
+    animateCardMove(card1, card2, animateStartX, animateStartY, animateEndX, animateEndY);
+
+    firstCard = card1;
+    secondCard = card2;
+
+    checkScore(firstCard, aiMaxCard, playerMinCard);
+    
+    sideTurn = sideTurn == 'computer' ? 'player' : 'computer';
+
+    setTimeout(() => {
+        checkTurn();
+    }, 1000);
 }
 
 function createTurnSelectors() {
